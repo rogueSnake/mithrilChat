@@ -1,0 +1,92 @@
+.boxSkin {
+  background-color : #709599;
+  color : #fff940;
+  align-self : center;
+  min-height : 200px;
+  font-size : 175%;
+  border-style : solid;
+  border-width : 8px;
+  margin : 4px;
+  border-color : gray;
+  padding : 10px;
+  border-radius : 12px;
+
+  font-family : Helvetica, sans-serif;
+}
+
+.playerBoxSkin {
+  min-height : 20px;
+  flex : 0 1 45%; 
+}
+
+.headerFooterBoxSkin {
+  min-height : 20px;
+}
+
+#body {
+  display : flex;
+  flex-flow : row wrap;
+  justify-content : space-around;
+  background : #beedff; /*linear-gradient(to bottom right, #beedff, #8db0bd);*/
+  color : #681b84;
+}
+
+#appTitle {
+  text-align : center;
+  flex: 0 1 94%;
+}
+
+#footerAdvertisement {
+  flex : 0 1 94%;
+  text-align : center;
+}
+
+#timeConfiguration {
+  font-size : 225%;
+  flex : 0 1 45%;
+  text-align : center;
+}
+
+#appMessage {
+  font-size : 150%;
+  flex : 0 1 45%;
+  text-align : center;
+}
+
+#whitePlayer { 
+  text-align : left;
+  color : #447f1f;
+  background-color : #ffefc8;
+}
+
+#blackPlayer {
+  text-align : right;
+  color : #ffefc8;
+  background-color : #447f1f;
+}
+
+input {
+  color : #681b84;
+  background-color : #b7ea69;
+  border-radius : 6px;
+}
+
+.button {
+  color : #681b84;
+  background-color : #b7ea69;
+  border-radius : 6px;
+}
+
+
+#whiteButton,
+#pauseButton {
+}
+
+#blackButton,
+#resetButton {
+}
+
+.button:disabled {
+  color : #555200;
+  background-color : #d4d16a;
+}
