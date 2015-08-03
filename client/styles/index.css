@@ -19,6 +19,15 @@
   flex : 0 1 45%; 
 }
 
+.scrollyBar{ 
+  font-size : 100%;
+  width : 485px%;
+  height : 800px;
+  overflow-y : auto;
+  max-width : 500px;
+  max-height : 500px;
+}
+
 .headerFooterBoxSkin {
   min-height : 20px;
 }

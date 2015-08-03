@@ -1280,45 +1280,30 @@ module.exports = appController;
 },{"mithril":2}],7:[function(require,module,exports){
 var m = require('mithril'),
   socket = require('../../utilities/socketUtility'),
-  chatController,
-  messages = [];
+  chatController;
 
 chatController = function () {
-  var message = '',
+  var message = 'All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy.',
+ 
     ctrl = {};
 
   ctrl.title = m.prop('');
   ctrl.body = m.prop('');
 
   ctrl.getMessage = function () {
-    var i = 0,
-      textBlock = '';
-
-    for (i = 0; i < messages.length; i += 1) {
-      textBlock = textBlock + messages[i].username + 
-          ': ' + messages[i].body;
-    }
-
-    return textBlock;
+    return message;
   };
 
   ctrl.submit = function () {
     socket.emit('submitMessage', ctrl.title(), ctrl.body());
   };
 
-  socket.on('postMessage', function (username, title, body) {
-    m.startComputation();
-    messages.push({
-      username : username,
-      body : body
-    });
-    m.endComputation();
-  });
-
-
-
   return ctrl;
 };
+
+socket.on('postMessage', function (username, title, body) {
+  console.log (username + title + body);
+});
 
 module.exports = chatController;
 
@@ -1466,8 +1451,9 @@ chatView = function (ctrl) {
   var view = [
 
     m('.boxSkin', [
-      m('div', {class : 'boxSkin scrollyBar'}, ctrl.getMessage()),
-      v('input', 'Message: ', ctrl.body),
+      m('div', {class : 'boxSkin'}, ctrl.getMessage()),
+      v('input', 'Tittle: ', ctrl.title),
+      v('input', 'Body: ', ctrl.body),
       v('button', 'Submit', ctrl.submit)
     ])
   ];
@@ -1543,7 +1529,7 @@ module.exports = signUpView;
 
 
 },{"../../utilities/viewUtility":18,"mithril":2}],16:[function(require,module,exports){
-var css = ".boxSkin {\n  background-color: #709599;\n  color: #fff940;\n  align-self: center;\n  min-height: 200px;\n  font-size: 175%;\n  border-style: solid;\n  border-width: 8px;\n  margin: 4px;\n  border-color: gray;\n  padding: 10px;\n  border-radius: 12px;\n  font-family: Helvetica, sans-serif;\n}\n.playerBoxSkin {\n  min-height: 20px;\n  flex: 0 1 45%;\n}\n.scrollyBar {\n  font-size: 100%;\n  width: 485px%;\n  height: 800px;\n  overflow-y: auto;\n  max-width: 500px;\n  max-height: 500px;\n}\n.headerFooterBoxSkin {\n  min-height: 20px;\n}\n#body {\n  display: flex;\n  flex-flow: row wrap;\n  justify-content: space-around;\n  background: #beedff;\n  /*linear-gradient(to bottom right, #beedff, #8db0bd);*/\n  color: #681b84;\n}\n#appTitle {\n  text-align: center;\n  flex: 0 1 94%;\n}\n#footerAdvertisement {\n  flex: 0 1 94%;\n  text-align: center;\n}\n#timeConfiguration {\n  font-size: 225%;\n  flex: 0 1 45%;\n  text-align: center;\n}\n#appMessage {\n  font-size: 150%;\n  flex: 0 1 45%;\n  text-align: center;\n}\n#whitePlayer {\n  text-align: left;\n  color: #447f1f;\n  background-color: #ffefc8;\n}\n#blackPlayer {\n  text-align: right;\n  color: #ffefc8;\n  background-color: #447f1f;\n}\ninput {\n  color: #681b84;\n  background-color: #b7ea69;\n  border-radius: 6px;\n}\n.button {\n  color: #681b84;\n  background-color: #b7ea69;\n  border-radius: 6px;\n}\n\n\n.button:disabled {\n  color: #555200;\n  background-color: #d4d16a;\n}\n"; (require("browserify-css").createStyle(css, { "href": "styles/index.css"})); module.exports = css;
+var css = ".boxSkin {\n  background-color: #709599;\n  color: #fff940;\n  align-self: center;\n  min-height: 200px;\n  font-size: 175%;\n  border-style: solid;\n  border-width: 8px;\n  margin: 4px;\n  border-color: gray;\n  padding: 10px;\n  border-radius: 12px;\n  font-family: Helvetica, sans-serif;\n}\n.playerBoxSkin {\n  min-height: 20px;\n  flex: 0 1 45%;\n}\n.scrollyBar {\n  font-size: 100%;\n  width: 100%;\n  height: 800px;\n  overflow-y: auto;\n  max-width: 500px;\n  max-height: 500px;\n}\n.headerFooterBoxSkin {\n  min-height: 20px;\n}\n#body {\n  display: flex;\n  flex-flow: row wrap;\n  justify-content: space-around;\n  background: #beedff;\n  /*linear-gradient(to bottom right, #beedff, #8db0bd);*/\n  color: #681b84;\n}\n#appTitle {\n  text-align: center;\n  flex: 0 1 94%;\n}\n#footerAdvertisement {\n  flex: 0 1 94%;\n  text-align: center;\n}\n#timeConfiguration {\n  font-size: 225%;\n  flex: 0 1 45%;\n  text-align: center;\n}\n#appMessage {\n  font-size: 150%;\n  flex: 0 1 45%;\n  text-align: center;\n}\n#whitePlayer {\n  text-align: left;\n  color: #447f1f;\n  background-color: #ffefc8;\n}\n#blackPlayer {\n  text-align: right;\n  color: #ffefc8;\n  background-color: #447f1f;\n}\ninput {\n  color: #681b84;\n  background-color: #b7ea69;\n  border-radius: 6px;\n}\n.button {\n  color: #681b84;\n  background-color: #b7ea69;\n  border-radius: 6px;\n}\n\n\n.button:disabled {\n  color: #555200;\n  background-color: #d4d16a;\n}\n"; (require("browserify-css").createStyle(css, { "href": "styles/index.css"})); module.exports = css;
 },{"browserify-css":1}],17:[function(require,module,exports){
 module.exports = io();
 

@@ -1,28 +1,44 @@
 var m = require('mithril'),
   socket = require('../../utilities/socketUtility'),
-  chatController;
+  chatController,
+  messages = [];
 
 chatController = function () {
-  var message = 'Welcome to the chat!',
+  var message = '',
     ctrl = {};
 
   ctrl.title = m.prop('');
   ctrl.body = m.prop('');
 
   ctrl.getMessage = function () {
-    return message;
+    var i = 0,
+      textBlock = '';
+
+    for (i = 0; i < messages.length; i += 1) {
+      textBlock = textBlock + messages[i].username + 
+          ': ' + messages[i].body;
+    }
+
+    return textBlock;
   };
 
   ctrl.submit = function () {
     socket.emit('submitMessage', ctrl.title(), ctrl.body());
   };
 
+  socket.on('postMessage', function (username, title, body) {
+    m.startComputation();
+    messages.push({
+      username : username,
+      body : body
+    });
+    m.endComputation();
+  });
+
+
+
   return ctrl;
 };
-
-socket.on('postMessage', function (username, title, body) {
-  console.log (username + title + body);
-});
 
 module.exports = chatController;
 
