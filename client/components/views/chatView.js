@@ -11,7 +11,7 @@ chatView = function (ctrl) {
   var view = [
 
     m('.boxSkin', [
-      m('div', {class : 'boxSkin scrollyBar'}, ctrl.getMessage()),
+      m('div', {class : 'boxSkin scrollyBar'}, ctrl.getMessages()),
       v('input', 'Message: ', ctrl.body),
       v('button', 'Submit', ctrl.submit)
     ])

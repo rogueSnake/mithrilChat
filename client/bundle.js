@@ -1,4 +1,373 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var css = require('./styles/index.css'),
+  m = require('mithril'),
+  appComponent = require('./components/appComponent'),
+  logInComponent = require('./components/logInComponent'),
+  signUpComponent = require('./components/signUpComponent'),
+  chatComponent = require('./components/chatComponent');
+
+m.route(document.body, "/", {
+  "/" : appComponent,
+  "/log_in" : logInComponent,
+  "/sign_up" : signUpComponent,
+  "/chat" : chatComponent
+});
+
+//m.route('/');
+
+
+},{"./components/appComponent":2,"./components/chatComponent":3,"./components/logInComponent":8,"./components/signUpComponent":9,"./styles/index.css":14,"mithril":18}],2:[function(require,module,exports){
+var appController = require('./controllers/appController'),
+  appView = require('./views/appView'),
+  appComponent = {
+    controller : appController,
+    view : appView
+  };
+
+module.exports = appComponent;
+
+
+},{"./controllers/appController":4,"./views/appView":10}],3:[function(require,module,exports){
+var chatController = require('./controllers/chatController'),
+  chatView = require('./views/chatView'),
+  chatComponent = {
+    controller : chatController,
+    view : chatView
+  };
+
+module.exports = chatComponent;
+
+
+},{"./controllers/chatController":5,"./views/chatView":11}],4:[function(require,module,exports){
+var m = require('mithril'),
+  appController;
+
+appController = function () {
+  var message = 'Sign up or log in to chat!';
+
+  return {
+
+    getMessage : function () {
+      return message;
+    },
+
+    logIn : function () {
+      m.route('/log_in');
+    },
+
+    signUp : function () {
+      m.route('/sign_up');
+    }
+  };
+};
+
+module.exports = appController;
+
+
+},{"mithril":18}],5:[function(require,module,exports){
+var m = require('mithril'),
+  socket = require('../../utilities/socketUtility'),
+  chatController,
+  messages = [];
+
+chatController = function () {
+  var message = '',
+    ctrl = {};
+
+  ctrl.title = m.prop('');
+  ctrl.body = m.prop('');
+
+  ctrl.getMessages = function () {
+    var i = 0,
+      messageBlock = [];
+
+    for (i = 0; i < messages.length; i += 1) {
+      messageBlock.push(m('div', messages[i].username + ': ' + messages[i].body));
+    }
+
+    return messageBlock;
+  };
+
+  ctrl.submit = function () {
+    socket.emit('submitMessage', ctrl.title(), ctrl.body());
+  };
+
+  socket.on('postMessage', function (username, title, body) {
+    m.startComputation();
+    messages.push({
+      username : username,
+      body : body
+    });
+    m.endComputation();
+  });
+
+
+
+  return ctrl;
+};
+
+module.exports = chatController;
+
+
+},{"../../utilities/socketUtility":15,"mithril":18}],6:[function(require,module,exports){
+var m = require('mithril'),
+  socket = require('../../utilities/socketUtility'),
+  logInController,
+  profileName;
+
+logInController = function () {
+  var message = 'Log in below...',
+    ctrl = {};
+
+  ctrl.username = m.prop('');
+  ctrl.password = m.prop('');
+
+  ctrl.getMessage = function () {
+    return message;
+  };
+
+  ctrl.back = function () {
+    m.route('/');
+  };
+
+  ctrl.logIn = function () {
+    profileName = ctrl.username();
+    socket.emit('logIn', ctrl.username(), ctrl.password());
+  };
+
+  return ctrl;
+};
+
+socket.on('confirmLogIn', function (status, name) {
+
+  if (profileName === name) {
+    m.route((status ? '/chat' : '/log_in'));
+  }
+});
+
+module.exports = logInController;
+
+
+},{"../../utilities/socketUtility":15,"mithril":18}],7:[function(require,module,exports){
+var m = require('mithril'),
+  socket = require('../../utilities/socketUtility'),
+  signUpController,
+  profileName;
+
+signUpController = function () {
+  var message = 'Sign up below...',
+    ctrl = {};
+
+  ctrl.username = m.prop('');
+  ctrl.password  =  m.prop('');
+  ctrl.confirmPassword = m.prop('');
+  ctrl.email = m.prop('');
+
+  ctrl.getMessage = function () {
+    return message;
+  };
+
+  ctrl.back = function () {
+    m.route('/');
+  };
+
+  ctrl.signUp = function () {
+    profileName = ctrl.username();
+    console.log(ctrl.username());
+    socket.emit('signUp', ctrl.username(), ctrl.password()); 
+  };
+
+  return ctrl;
+};
+
+socket.on('confirmSignUp', function (status, name) {
+  console.log('conf1');
+  if (profileName === name) {
+    m.route((status ? '/log_in' : '/sign_up'));
+  }
+});
+
+module.exports = signUpController;
+
+
+},{"../../utilities/socketUtility":15,"mithril":18}],8:[function(require,module,exports){
+var logInController = require('./controllers/logInController'),
+  logInView = require('./views/logInView'),
+  logInComponent = {
+    controller : logInController,
+    view : logInView
+  };
+
+module.exports = logInComponent;
+
+
+},{"./controllers/logInController":6,"./views/logInView":12}],9:[function(require,module,exports){
+var signUpController = require('./controllers/signUpController'),
+  signUpView = require('./views/signUpView'),
+  signUpComponent = {
+    controller : signUpController,
+    view : signUpView
+  };
+
+module.exports = signUpComponent;
+
+
+},{"./controllers/signUpController":7,"./views/signUpView":13}],10:[function(require,module,exports){
+var m = require('mithril'),
+  v = require('../../utilities/viewUtility'),
+  click,
+  appView;
+
+click = function () {
+  console.log('click');
+};
+
+appView = function (ctrl) {
+  var view = [
+
+    m('.boxSkin', [
+      m('div', {class : 'boxSkin'}, ctrl.getMessage()),
+      v('button', 'Log in', ctrl.logIn),
+      v('button', 'Sign up', ctrl.signUp)
+    ])
+  ];
+
+  return view;
+};
+
+module.exports = appView;
+
+
+},{"../../utilities/viewUtility":16,"mithril":18}],11:[function(require,module,exports){
+var m = require('mithril'),
+  v = require('../../utilities/viewUtility'),
+  click,
+  chatView; 
+
+click = function () {
+  console.log('click');
+};
+
+chatView = function (ctrl) {
+  var view = [
+
+    m('.boxSkin', [
+      m('div', {class : 'boxSkin scrollyBar'}, ctrl.getMessages()),
+      v('input', 'Message: ', ctrl.body),
+      v('button', 'Submit', ctrl.submit)
+    ])
+  ];
+
+  return view;
+};
+
+module.exports = chatView;
+
+
+},{"../../utilities/viewUtility":16,"mithril":18}],12:[function(require,module,exports){
+var m = require('mithril'),
+  v = require('../../utilities/viewUtility'),
+  click,
+  logInView; 
+
+click = function () {
+  console.log('click');
+};
+
+logInView = function (ctrl) {
+  var view = [
+
+    m('.boxSkin', [
+      m('div', {class : 'boxSkin'}, ctrl.getMessage()),
+      v('input', 'Username: ', ctrl.username),
+      v('input', 'Password: ', ctrl.password),
+      v('button', 'Back', ctrl.back),
+      v('button', 'Log in', ctrl.logIn)
+    ])
+  ];
+
+  return view;
+};
+
+module.exports = logInView;
+
+
+},{"../../utilities/viewUtility":16,"mithril":18}],13:[function(require,module,exports){
+var m = require('mithril'),
+  v = require('../../utilities/viewUtility'),
+  username = m.prop(''),
+  password = m.prop(''),
+  confirmationPassword = m.prop(''),
+  email = m.prop(''),
+  click,
+  signUpView;
+
+click = function () {
+  console.log('click');
+};
+
+signUpView = function (ctrl) {
+  var view = [
+
+    m('.boxSkin', [
+      m('div', {class : 'boxSkin'}, ctrl.getMessage()),
+
+      v('input', 'Username: ', ctrl.username),
+      v('input', 'Password: ', ctrl.password),
+      v('input', 'ConfirmPassword: ', ctrl.confirmPassword),
+      v('input', 'Email: ', ctrl.email),
+
+      v('button', 'Back', ctrl.back),
+      v('button', 'Sign up', ctrl.signUp)
+    ])
+  ];
+
+  return view;
+};
+
+module.exports = signUpView;
+
+
+},{"../../utilities/viewUtility":16,"mithril":18}],14:[function(require,module,exports){
+var css = ".boxSkin {\n  background-color: #709599;\n  color: #fff940;\n  align-self: center;\n  min-height: 200px;\n  font-size: 175%;\n  border-style: solid;\n  border-width: 8px;\n  margin: 4px;\n  border-color: gray;\n  padding: 10px;\n  border-radius: 12px;\n  font-family: Helvetica, sans-serif;\n}\n.playerBoxSkin {\n  min-height: 20px;\n  flex: 0 1 45%;\n}\n.scrollyBar {\n  font-size: 100%;\n  width: 485px%;\n  height: 800px;\n  overflow-y: auto;\n  max-width: 500px;\n  max-height: 500px;\n}\n.headerFooterBoxSkin {\n  min-height: 20px;\n}\n#body {\n  display: flex;\n  flex-flow: row wrap;\n  justify-content: space-around;\n  background: #beedff;\n  /*linear-gradient(to bottom right, #beedff, #8db0bd);*/\n  color: #681b84;\n}\n#appTitle {\n  text-align: center;\n  flex: 0 1 94%;\n}\n#footerAdvertisement {\n  flex: 0 1 94%;\n  text-align: center;\n}\n#timeConfiguration {\n  font-size: 225%;\n  flex: 0 1 45%;\n  text-align: center;\n}\n#appMessage {\n  font-size: 150%;\n  flex: 0 1 45%;\n  text-align: center;\n}\n#whitePlayer {\n  text-align: left;\n  color: #447f1f;\n  background-color: #ffefc8;\n}\n#blackPlayer {\n  text-align: right;\n  color: #ffefc8;\n  background-color: #447f1f;\n}\ninput {\n  color: #681b84;\n  background-color: #b7ea69;\n  border-radius: 6px;\n}\n.button {\n  color: #681b84;\n  background-color: #b7ea69;\n  border-radius: 6px;\n}\n\n\n.button:disabled {\n  color: #555200;\n  background-color: #d4d16a;\n}\n"; (require("browserify-css").createStyle(css, { "href": "styles/index.css"})); module.exports = css;
+},{"browserify-css":17}],15:[function(require,module,exports){
+module.exports = io();
+
+
+},{}],16:[function(require,module,exports){
+var m = require('mithril'),
+  makeInput,
+  makeButton,
+  v;
+
+makeInput = function (titleText, propValue) {
+  return m('div', titleText, [
+    m("input[type=input]", {'class' : 'button', onchange: m.withAttr('value', 
+        propValue), 'value' : propValue()})
+  ]);
+};
+
+makeButton = function (buttonText, onClick) {
+  return m("button[type=button]", {class : 'button', onclick: onClick || 
+      function () {}}, buttonText || "");
+};
+
+// v is the external interface of viewUtil, which redirects to other functions.
+v = function (command, arg0, arg1) {
+  switch (command) {
+    case 'input' :
+      return makeInput(arg0, arg1);
+      break;
+    case 'button' : 
+      return makeButton(arg0, arg1);
+      break;
+  }
+};
+
+module.exports = v;
+
+
+},{"mithril":18}],17:[function(require,module,exports){
 'use strict';
 // For more information about browser field, check out the browser field at https://github.com/substack/browserify-handbook#browser-field.
 
@@ -50,7 +419,7 @@ module.exports = {
     }
 };
 
-},{}],2:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var m = (function app(window, undefined) {
 	var OBJECT = "[object Object]", ARRAY = "[object Array]", STRING = "[object String]", FUNCTION = "function";
 	var type = {}.toString;
@@ -1211,374 +1580,4 @@ var m = (function app(window, undefined) {
 if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
 else if (typeof define === "function" && define.amd) define(function() {return m});
 
-},{}],3:[function(require,module,exports){
-var css = require('./styles/index.css'),
-  m = require('mithril'),
-  appComponent = require('./components/appComponent'),
-  logInComponent = require('./components/logInComponent'),
-  signUpComponent = require('./components/signUpComponent'),
-  chatComponent = require('./components/chatComponent');
-
-m.route(document.body, "/", {
-  "/" : appComponent,
-  "/log_in" : logInComponent,
-  "/sign_up" : signUpComponent,
-  "/chat" : chatComponent
-});
-
-//m.route('/');
-
-
-},{"./components/appComponent":4,"./components/chatComponent":5,"./components/logInComponent":10,"./components/signUpComponent":11,"./styles/index.css":16,"mithril":2}],4:[function(require,module,exports){
-var appController = require('./controllers/appController'),
-  appView = require('./views/appView'),
-  appComponent = {
-    controller : appController,
-    view : appView
-  };
-
-module.exports = appComponent;
-
-
-},{"./controllers/appController":6,"./views/appView":12}],5:[function(require,module,exports){
-var chatController = require('./controllers/chatController'),
-  chatView = require('./views/chatView'),
-  chatComponent = {
-    controller : chatController,
-    view : chatView
-  };
-
-module.exports = chatComponent;
-
-
-},{"./controllers/chatController":7,"./views/chatView":13}],6:[function(require,module,exports){
-var m = require('mithril'),
-  appController;
-
-appController = function () {
-  var message = 'Sign up or log in to chat!';
-
-  return {
-
-    getMessage : function () {
-      return message;
-    },
-
-    logIn : function () {
-      m.route('/log_in');
-    },
-
-    signUp : function () {
-      m.route('/sign_up');
-    }
-  };
-};
-
-module.exports = appController;
-
-
-},{"mithril":2}],7:[function(require,module,exports){
-var m = require('mithril'),
-  socket = require('../../utilities/socketUtility'),
-  chatController,
-  messages = [];
-
-chatController = function () {
-  var message = '',
-    ctrl = {};
-
-  ctrl.title = m.prop('');
-  ctrl.body = m.prop('');
-
-  ctrl.getMessage = function () {
-    var i = 0,
-      textBlock = '';
-
-    for (i = 0; i < messages.length; i += 1) {
-      textBlock = textBlock + messages[i].username + 
-          ': ' + messages[i].body;
-    }
-
-    return textBlock;
-  };
-
-  ctrl.submit = function () {
-    socket.emit('submitMessage', ctrl.title(), ctrl.body());
-  };
-
-  socket.on('postMessage', function (username, title, body) {
-    m.startComputation();
-    messages.push({
-      username : username,
-      body : body
-    });
-    m.endComputation();
-  });
-
-
-
-  return ctrl;
-};
-
-module.exports = chatController;
-
-
-},{"../../utilities/socketUtility":17,"mithril":2}],8:[function(require,module,exports){
-var m = require('mithril'),
-  socket = require('../../utilities/socketUtility'),
-  logInController,
-  profileName;
-
-logInController = function () {
-  var message = 'Log in below...',
-    ctrl = {};
-
-  ctrl.username = m.prop('');
-  ctrl.password = m.prop('');
-
-  ctrl.getMessage = function () {
-    return message;
-  };
-
-  ctrl.back = function () {
-    m.route('/');
-  };
-
-  ctrl.logIn = function () {
-    profileName = ctrl.username();
-    socket.emit('logIn', ctrl.username(), ctrl.password());
-  };
-
-  return ctrl;
-};
-
-socket.on('confirmLogIn', function (status, name) {
-
-  if (profileName === name) {
-    m.route((status ? '/chat' : '/log_in'));
-  }
-});
-
-module.exports = logInController;
-
-
-},{"../../utilities/socketUtility":17,"mithril":2}],9:[function(require,module,exports){
-var m = require('mithril'),
-  socket = require('../../utilities/socketUtility'),
-  signUpController,
-  profileName;
-
-signUpController = function () {
-  var message = 'Sign up below...',
-    ctrl = {};
-
-  ctrl.username = m.prop('');
-  ctrl.password  =  m.prop('');
-  ctrl.confirmPassword = m.prop('');
-  ctrl.email = m.prop('');
-
-  ctrl.getMessage = function () {
-    return message;
-  };
-
-  ctrl.back = function () {
-    m.route('/');
-  };
-
-  ctrl.signUp = function () {
-    profileName = ctrl.username();
-    console.log(ctrl.username());
-    socket.emit('signUp', ctrl.username(), ctrl.password()); 
-  };
-
-  return ctrl;
-};
-
-socket.on('confirmSignUp', function (status, name) {
-  console.log('conf1');
-  if (profileName === name) {
-    m.route((status ? '/log_in' : '/sign_up'));
-  }
-});
-
-module.exports = signUpController;
-
-
-},{"../../utilities/socketUtility":17,"mithril":2}],10:[function(require,module,exports){
-var logInController = require('./controllers/logInController'),
-  logInView = require('./views/logInView'),
-  logInComponent = {
-    controller : logInController,
-    view : logInView
-  };
-
-module.exports = logInComponent;
-
-
-},{"./controllers/logInController":8,"./views/logInView":14}],11:[function(require,module,exports){
-var signUpController = require('./controllers/signUpController'),
-  signUpView = require('./views/signUpView'),
-  signUpComponent = {
-    controller : signUpController,
-    view : signUpView
-  };
-
-module.exports = signUpComponent;
-
-
-},{"./controllers/signUpController":9,"./views/signUpView":15}],12:[function(require,module,exports){
-var m = require('mithril'),
-  v = require('../../utilities/viewUtility'),
-  click,
-  appView;
-
-click = function () {
-  console.log('click');
-};
-
-appView = function (ctrl) {
-  var view = [
-
-    m('.boxSkin', [
-      m('div', {class : 'boxSkin'}, ctrl.getMessage()),
-      v('button', 'Log in', ctrl.logIn),
-      v('button', 'Sign up', ctrl.signUp)
-    ])
-  ];
-
-  return view;
-};
-
-module.exports = appView;
-
-
-},{"../../utilities/viewUtility":18,"mithril":2}],13:[function(require,module,exports){
-var m = require('mithril'),
-  v = require('../../utilities/viewUtility'),
-  click,
-  chatView; 
-
-click = function () {
-  console.log('click');
-};
-
-chatView = function (ctrl) {
-  var view = [
-
-    m('.boxSkin', [
-      m('div', {class : 'boxSkin scrollyBar'}, ctrl.getMessage()),
-      v('input', 'Message: ', ctrl.body),
-      v('button', 'Submit', ctrl.submit)
-    ])
-  ];
-
-  return view;
-};
-
-module.exports = chatView;
-
-
-},{"../../utilities/viewUtility":18,"mithril":2}],14:[function(require,module,exports){
-var m = require('mithril'),
-  v = require('../../utilities/viewUtility'),
-  click,
-  logInView; 
-
-click = function () {
-  console.log('click');
-};
-
-logInView = function (ctrl) {
-  var view = [
-
-    m('.boxSkin', [
-      m('div', {class : 'boxSkin'}, ctrl.getMessage()),
-      v('input', 'Username: ', ctrl.username),
-      v('input', 'Password: ', ctrl.password),
-      v('button', 'Back', ctrl.back),
-      v('button', 'Log in', ctrl.logIn)
-    ])
-  ];
-
-  return view;
-};
-
-module.exports = logInView;
-
-
-},{"../../utilities/viewUtility":18,"mithril":2}],15:[function(require,module,exports){
-var m = require('mithril'),
-  v = require('../../utilities/viewUtility'),
-  username = m.prop(''),
-  password = m.prop(''),
-  confirmationPassword = m.prop(''),
-  email = m.prop(''),
-  click,
-  signUpView;
-
-click = function () {
-  console.log('click');
-};
-
-signUpView = function (ctrl) {
-  var view = [
-
-    m('.boxSkin', [
-      m('div', {class : 'boxSkin'}, ctrl.getMessage()),
-
-      v('input', 'Username: ', ctrl.username),
-      v('input', 'Password: ', ctrl.password),
-      v('input', 'ConfirmPassword: ', ctrl.confirmPassword),
-      v('input', 'Email: ', ctrl.email),
-
-      v('button', 'Back', ctrl.back),
-      v('button', 'Sign up', ctrl.signUp)
-    ])
-  ];
-
-  return view;
-};
-
-module.exports = signUpView;
-
-
-},{"../../utilities/viewUtility":18,"mithril":2}],16:[function(require,module,exports){
-var css = ".boxSkin {\n  background-color: #709599;\n  color: #fff940;\n  align-self: center;\n  min-height: 200px;\n  font-size: 175%;\n  border-style: solid;\n  border-width: 8px;\n  margin: 4px;\n  border-color: gray;\n  padding: 10px;\n  border-radius: 12px;\n  font-family: Helvetica, sans-serif;\n}\n.playerBoxSkin {\n  min-height: 20px;\n  flex: 0 1 45%;\n}\n.scrollyBar {\n  font-size: 100%;\n  width: 485px%;\n  height: 800px;\n  overflow-y: auto;\n  max-width: 500px;\n  max-height: 500px;\n}\n.headerFooterBoxSkin {\n  min-height: 20px;\n}\n#body {\n  display: flex;\n  flex-flow: row wrap;\n  justify-content: space-around;\n  background: #beedff;\n  /*linear-gradient(to bottom right, #beedff, #8db0bd);*/\n  color: #681b84;\n}\n#appTitle {\n  text-align: center;\n  flex: 0 1 94%;\n}\n#footerAdvertisement {\n  flex: 0 1 94%;\n  text-align: center;\n}\n#timeConfiguration {\n  font-size: 225%;\n  flex: 0 1 45%;\n  text-align: center;\n}\n#appMessage {\n  font-size: 150%;\n  flex: 0 1 45%;\n  text-align: center;\n}\n#whitePlayer {\n  text-align: left;\n  color: #447f1f;\n  background-color: #ffefc8;\n}\n#blackPlayer {\n  text-align: right;\n  color: #ffefc8;\n  background-color: #447f1f;\n}\ninput {\n  color: #681b84;\n  background-color: #b7ea69;\n  border-radius: 6px;\n}\n.button {\n  color: #681b84;\n  background-color: #b7ea69;\n  border-radius: 6px;\n}\n\n\n.button:disabled {\n  color: #555200;\n  background-color: #d4d16a;\n}\n"; (require("browserify-css").createStyle(css, { "href": "styles/index.css"})); module.exports = css;
-},{"browserify-css":1}],17:[function(require,module,exports){
-module.exports = io();
-
-
-},{}],18:[function(require,module,exports){
-var m = require('mithril'),
-  makeInput,
-  makeButton,
-  v;
-
-makeInput = function (titleText, propValue) {
-  return m('div', titleText, [
-    m("input[type=input]", {'class' : 'button', onchange: m.withAttr('value', 
-        propValue), 'value' : propValue()})
-  ]);
-};
-
-makeButton = function (buttonText, onClick) {
-  return m("button[type=button]", {class : 'button', onclick: onClick || 
-      function () {}}, buttonText || "");
-};
-
-// v is the external interface of viewUtil, which redirects to other functions.
-v = function (command, arg0, arg1) {
-  switch (command) {
-    case 'input' :
-      return makeInput(arg0, arg1);
-      break;
-    case 'button' : 
-      return makeButton(arg0, arg1);
-      break;
-  }
-};
-
-module.exports = v;
-
-
-},{"mithril":2}]},{},[3]);
+},{}]},{},[1]);

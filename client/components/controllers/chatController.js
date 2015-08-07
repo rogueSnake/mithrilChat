@@ -10,16 +10,15 @@ chatController = function () {
   ctrl.title = m.prop('');
   ctrl.body = m.prop('');
 
-  ctrl.getMessage = function () {
+  ctrl.getMessages = function () {
     var i = 0,
-      textBlock = '';
+      messageBlock = [];
 
     for (i = 0; i < messages.length; i += 1) {
-      textBlock = textBlock + messages[i].username + 
-          ': ' + messages[i].body;
+      messageBlock.push(m('div', messages[i].username + ': ' + messages[i].body));
     }
 
-    return textBlock;
+    return messageBlock;
   };
 
   ctrl.submit = function () {
